@@ -170,7 +170,7 @@ input[type="number"] {
 <script src="js/nav-bar.js"></script>
 <script src="js/functions.js"></script>
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const productId = getFromUrl('product_id');
     getProductData(productId);
 
@@ -178,11 +178,9 @@ input[type="number"] {
         const productsContainer = document.getElementById("product_container");
         productsContainer.innerHTML = ""; // Clear the previous content
 
-        // Create the main product element container
         const productElement = document.createElement('div');
         productElement.classList.add('row', 'product');
 
-        // Product Image Section
         const productImageHTML = `
             <div class="col-lg-7">
                 <div class="product_image">
@@ -190,14 +188,12 @@ input[type="number"] {
                         <img src="${product.Product_image_path}" alt="${product.product_name}">
                     </div>
                     <div id="image_thumbnails" class="product_image_thumbnails d-flex flex-row align-items-start justify-content-start">
-                        <!-- Thumbnails for additional images -->
-                        <img  src="${product.Product_image_path}" alt="${product.product_name}" class="product_image_thumbnail" style="background-image:url(${product.Product_image_path})" data-image="${product.Product_image_path}"></img>
+                        <img src="${product.Product_image_path}" alt="${product.product_name}" class="product_image_thumbnail" data-image="${product.Product_image_path}">
                     </div>
                 </div>
             </div>
         `;
 
-        // Product Content Section
         const productContentHTML = `
             <div class="col-lg-5">
                 <div class="product_content">
@@ -206,10 +202,10 @@ input[type="number"] {
                     <div id="product_description" class="product_text">
                         <p>${product.product_description || 'No description available.'}</p>
                     </div>
-				    <div class="product_quantity_container">
+                    <div class="product_quantity_container">
                         <span>Quantity</span>
                         <div class="product_quantity clearfix">
-                            <input class="" id="quantity_input" type="number" min="0" value="1">
+                            <input id="quantity_input" type="number" min="1" value="1">
                             <div class="quantity_buttons">
                                 <div id="quantity_inc_button" class="quantity_inc quantity_control">
                                     <i class="fa fa-caret-up" aria-hidden="true"></i>
@@ -233,80 +229,72 @@ input[type="number"] {
             </div>
         `;
 
-        // Append the product image and content to the main product container
         productElement.innerHTML = productImageHTML + productContentHTML;
         productsContainer.appendChild(productElement);
 
-        // Add size selection event listeners
-        const sizeInputs = document.querySelectorAll('input[name="product_radio"]');
-        sizeInputs.forEach(input => {
+        document.getElementById('quantity_input').addEventListener('input', function () {
+            updatePrice(product.product_size_list);
+        });
+
+        document.querySelectorAll('input[name="product_radio"]').forEach(input => {
             input.addEventListener('change', function () {
-                updatePrice(product.product_size_list, this.id.replace('radio_', ''));
+                updatePrice(product.product_size_list);
             });
+        });
+
+        document.addEventListener('click', function (e) {
+            const quantityInput = document.getElementById('quantity_input');
+            let currentValue = parseInt(quantityInput.value);
+
+            if (e.target.closest('#quantity_inc_button')) {
+                quantityInput.value = currentValue + 1;
+            }
+
+            if (e.target.closest('#quantity_dec_button') && currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+
+            updatePrice(product.product_size_list);
         });
     }
 
-    // Helper function to render sizes from the product size list
-	function getProductSizes(sizeList) {
-		const sizes = JSON.parse(sizeList); // Assuming it's stored as a JSON string
-		let sizeHTML = '';
-		for (const size in sizes) {
-			sizeHTML += `
-				<li>
-					<input 
-						type="radio" 
-						id="radio_${size}" 
-						name="product_radio" 
-						class="regular_radio radio_${size}"
-						${size === "100ml" ? "checked" : ""}
-					>
-					<label for="radio_${size}">${size}</label>
-				</li>
-			`;
-		}
-		return sizeHTML;
-	}
-
-    // Helper function to update the product price based on size
-    function updatePrice(sizeList, selectedSize) {
+    function getProductSizes(sizeList) {
         const sizes = JSON.parse(sizeList);
-        const selectedPrice = sizes[selectedSize];
-        const priceElement = document.getElementById('product_price');
-        if (selectedPrice) {
-            priceElement.textContent = `JD ${selectedPrice}`;
+        let sizeHTML = '';
+        for (const size in sizes) {
+            sizeHTML += `
+                <li>
+                    <input 
+                        type="radio" 
+                        id="radio_${size}" 
+                        name="product_radio" 
+                        class="regular_radio radio_${size}"
+                        ${size === "100ml" ? "checked" : ""}
+                    >
+                    <label for="radio_${size}">${size}</label>
+                </li>
+            `;
         }
+        return sizeHTML;
+    }
+
+    function updatePrice(sizeList) {
+        const sizes = JSON.parse(sizeList);
+        const selectedSize = document.querySelector('input[name="product_radio"]:checked').id.replace('radio_', '');
+        const selectedPrice = sizes[selectedSize] || 0;
+        const quantity = parseInt(document.getElementById('quantity_input').value) || 1;
+        const totalPrice = selectedPrice * quantity;
+        
+        document.getElementById('product_price').textContent = `JD ${totalPrice.toFixed(2)}`;
     }
 
     function getProductData(productId) {
         fetch(`../API's/product_api's/get_product.php?product_id=${productId}`)
-            .then(res => {
-                if (!res.ok) throw new Error(res.statusText);
-                return res.json();
-            })
-            .then(data => {
-                console.log(data);
-                renderProduct(data.data);
-            });
+            .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+            .then(data => renderProduct(data.data))
+            .catch(error => console.error("Error fetching product:", error));
     }
-
-    // Add event listeners for quantity increment and decrement
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('#quantity_inc_button')) {
-            const quantityInput = document.getElementById('quantity_input');
-            let currentValue = parseInt(quantityInput.value);
-            quantityInput.value = currentValue + 1;
-        }
-
-        if (e.target.closest('#quantity_dec_button')) {
-            const quantityInput = document.getElementById('quantity_input');
-            let currentValue = parseInt(quantityInput.value);
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        }
-    });
 });
-
 </script>
 </body>
 </html>
