@@ -194,6 +194,18 @@ input[type="number"] {
                         <img  src="${product.Product_image_path}" alt="${product.product_name}" class="product_image_thumbnail" style="background-image:url(${product.Product_image_path})" data-image="${product.Product_image_path}"></img>
                     </div>
                 </div>
+            </div>
+        `;
+
+        // Product Content Section
+        const productContentHTML = `
+            <div class="col-lg-5">
+                <div class="product_content">
+                    <div class="product_name">${product.product_name}</div>
+                    <div id="product_price" class="product_price">JD ${product.product_price}</div>
+                    <div id="product_description" class="product_text">
+                        <p>${product.product_description || 'No description available.'}</p>
+                    </div>
 				    <div class="product_quantity_container">
                         <span>Quantity</span>
                         <div class="product_quantity clearfix">
@@ -217,19 +229,6 @@ input[type="number"] {
                         </div>
                         <div class="button cart_button"><a class="text-white" href="#">add to cart</a></div>
                     </div>
-            </div>
-        `;
-
-        // Product Content Section
-        const productContentHTML = `
-            <div class="col-lg-5">
-                <div class="product_content">
-                    <div class="product_name">${product.product_name}</div>
-                    <div id="product_price" class="product_price">JD ${product.product_price}</div>
-                    <div id="product_description" class="product_text">
-                        <p>${product.product_description || 'No description available.'}</p>
-                    </div>
-
                 </div>
             </div>
         `;
