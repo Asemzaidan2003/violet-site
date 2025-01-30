@@ -187,11 +187,11 @@ input[type="number"] {
             <div class="col-lg-7">
                 <div class="product_image">
                     <div id="main_image" class="product_image_large d-flex justify-content-center">
-                        <img src="../API's/product_api's${product.Product_image_path}" alt="${product.product_name}">
+                        <img src="${product.Product_image_path}" alt="${product.product_name}">
                     </div>
                     <div id="image_thumbnails" class="product_image_thumbnails d-flex flex-row align-items-start justify-content-start">
                         <!-- Thumbnails for additional images -->
-                        <img  src="../API's/product_api's${product.Product_image_path}" alt="${product.product_name}" class="product_image_thumbnail" style="background-image:url(../API's/product_api's${product.Product_image_path})" data-image="../API's/product_api's${product.Product_image_path}"></img>
+                        <img  src="${product.Product_image_path}" alt="${product.product_name}" class="product_image_thumbnail" style="background-image:url(${product.Product_image_path})" data-image="${product.Product_image_path}"></img>
                     </div>
                 </div>
 				    <div class="product_quantity_container">

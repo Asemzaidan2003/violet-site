@@ -9,7 +9,7 @@ function renderProducts(element_id,products) {
                 <!-- Product Image -->
                 <a href="product.php?product_id=${product.product_id}" class="text-decoration-none">
                     <div class="mb-3">
-                        <img src="../API's/product_api's${product.Product_image_path}" class="img-fluid rounded product_image" alt="${product.name}">
+                        <img src="${product.Product_image_path}" class="img-fluid rounded product_image" alt="${product.name}">
                     </div>
                 </a>
                 
