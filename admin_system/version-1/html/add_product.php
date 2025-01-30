@@ -84,7 +84,7 @@
                       </div>
                       <div class="col m-1">
                         <label for="product image" class="form-label">product image</label>
-                        <input type="file" class="form-control" id="product_image"/>
+                        <input type="text" class="form-control" id="product_image"/>
                       </div>
                     </div>
                     <div class="card-body">
@@ -199,19 +199,15 @@
     <!-- costumed script for this page  -->
     <script>
 document.addEventListener('DOMContentLoaded', function () {
-    let productImageFile = null;
-
-    function createFileList(files) {
-        const dataTransfer = new DataTransfer();
-        files.forEach(file => dataTransfer.items.add(file));
-        return dataTransfer.files;
-    }
+    let productImageUrl = null;
 
     const fileInput = document.getElementById("product_image");
     if (fileInput) {
         fileInput.addEventListener("change", function (event) {
-            productImageFile = event.target.files[0];
-            console.log("File selected via input:", productImageFile);
+            // Remove the file handling as you're passing the URL instead
+            const imageUrl = event.target.value;
+            console.log("Image URL selected via input:", imageUrl);
+            productImageUrl = imageUrl;
         });
     }
 
@@ -242,8 +238,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 imageDisplay.src = e.target.result;
                 imageDisplayRow.classList.remove("hidden");
 
-                productImageFile = imageFile;
-                inputElement.files = createFileList([imageFile]);
+                // Instead of file, set URL
+                productImageUrl = e.target.result;
+                inputElement.value = productImageUrl; // Set the URL to the input
                 inputElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
             };
 
@@ -280,12 +277,12 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Product Name:", product_name);
             console.log("Product Price:", product_price);
             console.log("Product Gender:", product_gender);
-            console.log("product_description:",product_description)
+            console.log("product_description:", product_description);
             console.log("10ml Price:", ten_ml_price);
             console.log("30ml Price:", thirty_ml_price);
             console.log("50ml Price:", fifty_ml_price);
             console.log("100ml Price:", one_hundred_ml_price);
-            console.log("Image File:", productImageFile);
+            console.log("Image URL:", productImageUrl);
 
             if (!product_name?.trim()) {
                 displayError("product_name", "Name must be inserted!");
@@ -301,8 +298,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 displayError("product_price", "");
             }
 
-            if (!productImageFile) {
-                displayError("product_image", "Image must be uploaded!");
+            if (!productImageUrl) {
+                displayError("product_image", "Image URL must be provided!");
                 not_valid = true;
             } else {
                 displayError("product_image", "");
@@ -314,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 productData.append("product_price", product_price);
                 productData.append("product_gender", product_gender);
                 productData.append("product_size_list", JSON.stringify(product_size_list));
-                productData.append("product_image", productImageFile);
+                productData.append("product_image_url", productImageUrl); // Send the URL instead of file
                 productData.append("product_description", product_description);
                 for (let [key, value] of productData.entries()) {
                     console.log(`${key}: ${value}`);
@@ -342,6 +339,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+</script>
+
 
     </script>
   </body>

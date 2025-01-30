@@ -83,7 +83,7 @@
                       </div>
                       <div class="col m-1">
                         <label for="product image" class="form-label">product image</label>
-                        <input type="file" class="form-control" id="product_image"/>
+                        <input type="text" class="form-control" id="product_image"/>
                       </div>
                     </div>
                     <div class="card-body">
@@ -197,170 +197,189 @@
 </script>
     <!-- costumed script for this page  -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let productImageFile = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        let productImageUrl = null; // Changed from productImageFile to productImageUrl for handling URL
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('product_id');
-            if (!productId) {
-                alert("Product ID is missing in the URL.");
-                return;
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product_id');
+        if (!productId) {
+            alert("Product ID is missing in the URL.");
+            return;
+        }
 
-            fetch(`../../../API's/product_api's/get_product.php?product_id=${productId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status && data.data) {
-                        const product = data.data;
-                        product.product_size_list = JSON.parse(product.product_size_list)
-                        document.getElementById('product_name').value = product.product_name;
-                        document.getElementById('product_price').value = product.product_price;
-                        document.getElementById('product_gender').value = product.product_gender;
-                        quill.root.innerHTML = product.product_description;
-                        document.getElementById('100_ml_price').value = product.product_size_list["100ml"];
-                        document.getElementById('50_ml_price').value = product.product_size_list["50ml"];
-                        document.getElementById('30_ml_price').value = product.product_size_list["30ml"];
-                        document.getElementById('10_ml_price').value = product.product_size_list["10ml"];
+        fetch(`../../../API's/product_api's/get_product.php?product_id=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.data) {
+                    const product = data.data;
+                    product.product_size_list = JSON.parse(product.product_size_list);
+                    document.getElementById('product_name').value = product.product_name;
+                    document.getElementById('product_price').value = product.product_price;
+                    document.getElementById('product_gender').value = product.product_gender;
+                    quill.root.innerHTML = product.product_description;
+                    document.getElementById('100_ml_price').value = product.product_size_list["100ml"];
+                    document.getElementById('50_ml_price').value = product.product_size_list["50ml"];
+                    document.getElementById('30_ml_price').value = product.product_size_list["30ml"];
+                    document.getElementById('10_ml_price').value = product.product_size_list["10ml"];
 
-                        // Handle displaying the product image
-                        const imageDisplay = document.getElementById("image_display");
-                        const imageDisplayRow = document.getElementById("image_display_row");
-                        if (product.Product_image_path) {
-                            imageDisplay.src = `../../../API's/product_api's/${product.Product_image_path}`;
-                            imageDisplayRow.classList.remove("hidden");
-                        }
-                    } else {
-                        alert("Product not found or error fetching product data.");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching product details:', error);
-                    alert('An error occurred while fetching the product details.');
-                });
-
-            // Function to create a file list for the file input
-            function createFileList(files) {
-                const dataTransfer = new DataTransfer();
-                files.forEach(file => dataTransfer.items.add(file));
-                return dataTransfer.files;
-            }
-
-            const fileInput = document.getElementById("product_image");
-            if (fileInput) {
-                fileInput.addEventListener("change", function (event) {
-                    productImageFile = event.target.files[0];
-                    console.log("File selected via input:", productImageFile);
-                });
-            }
-
-            document.addEventListener('paste', function (event) {
-                const clipboardItems = event.clipboardData?.items || [];
-                let imageFile = null;
-
-                for (let i = 0; i < clipboardItems.length; i++) {
-                    if (clipboardItems[i].type.indexOf("image") !== -1) {
-                        imageFile = clipboardItems[i].getAsFile();
-                        break;
-                    }
-                }
-
-                if (imageFile) {
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        const inputElement = document.getElementById('product_image');
-                        const imageDisplay = document.getElementById("image_display");
-                        const imageDisplayRow = document.getElementById("image_display_row");
-
-                        if (!inputElement || !imageDisplay || !imageDisplayRow) {
-                            console.error("Required DOM elements are missing!");
-                            return;
-                        }
-
-                        imageDisplay.src = e.target.result;
+                    // Handle displaying the product image
+                    const imageDisplay = document.getElementById("image_display");
+                    const imageDisplayRow = document.getElementById("image_display_row");
+                    if (product.Product_image_path) {
+                        imageDisplay.src = `../../../API's/product_api's/${product.Product_image_path}`;
                         imageDisplayRow.classList.remove("hidden");
+                    }
 
-                        productImageFile = imageFile;
-                        inputElement.files = createFileList([imageFile]);
-                        inputElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-                    };
-
-                    reader.onerror = function () {
-                        alert("Failed to read the file!");
-                    };
-
-                    reader.readAsDataURL(imageFile);
+                    // Set the image URL input field (if applicable)
+                    const imageUrlInput = document.getElementById('product_image_url');
+                    if (product.Product_image_url) {
+                        imageUrlInput.value = product.Product_image_url;
+                    }
                 } else {
-                    alert("No image found in clipboard!");
+                    alert("Product not found or error fetching product data.");
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching product details:', error);
+                alert('An error occurred while fetching the product details.');
             });
 
-            // Edit product button click handler
-            const editProductButton = document.getElementById('edit_product');
-            if (editProductButton) {
-                editProductButton.addEventListener('click', function () {
-                    const product_name = document.getElementById('product_name')?.value;
-                    const product_price = document.getElementById('product_price')?.value;
-                    const product_gender = document.getElementById('product_gender')?.value;
-                    const product_description = quill.root.innerHTML;
-                    const one_hundred_ml_price = document.getElementById('100_ml_price')?.value;
-                    const fifty_ml_price = document.getElementById('50_ml_price')?.value;
-                    const thirty_ml_price = document.getElementById('30_ml_price')?.value;
-                    const ten_ml_price = document.getElementById('10_ml_price')?.value;
+        // Edit product button click handler
+        const editProductButton = document.getElementById('edit_product');
+        if (editProductButton) {
+            editProductButton.addEventListener('click', function () {
+                const product_name = document.getElementById('product_name')?.value;
+                const product_price = document.getElementById('product_price')?.value;
+                const product_gender = document.getElementById('product_gender')?.value;
+                const product_description = quill.root.innerHTML;
+                const one_hundred_ml_price = document.getElementById('100_ml_price')?.value;
+                const fifty_ml_price = document.getElementById('50_ml_price')?.value;
+                const thirty_ml_price = document.getElementById('30_ml_price')?.value;
+                const ten_ml_price = document.getElementById('10_ml_price')?.value;
 
-                    const product_size_list = {
-                        "10ml": ten_ml_price,
-                        "30ml": thirty_ml_price,
-                        "50ml": fifty_ml_price,
-                        "100ml": one_hundred_ml_price,
+                const product_size_list = {
+                    "10ml": ten_ml_price,
+                    "30ml": thirty_ml_price,
+                    "50ml": fifty_ml_price,
+                    "100ml": one_hundred_ml_price,
+                };
+
+                // Get the image URL (if provided)
+                const product_image_url = document.getElementById('product_image_url')?.value;
+                let not_valid = false;
+                if (!product_name?.trim()) {
+                    displayError("product_name", "Name must be inserted!");
+                    not_valid = true;
+                } else {
+                    displayError("product_name", "");
+                }
+
+                if (isNaN(product_price) || Number(product_price) <= 0) {
+                    displayError("product_price", "Price must be a valid number greater than zero!");
+                    not_valid = true;
+                } else {
+                    displayError("product_price", "");
+                }
+
+                if (!product_image_url && !productImageFile) {
+                    displayError("product_image", "Image URL or Image file must be provided!");
+                    not_valid = true;
+                } else {
+                    displayError("product_image", "");
+                }
+
+                if (!not_valid) {
+                    const productData = {
+                        "product_id": productId,
+                        "product_name": product_name,
+                        "product_price": product_price,
+                        "product_gender": product_gender,
+                        "product_size_list": JSON.stringify(product_size_list),
+                        "product_description": product_description,
+                        "product_image_url": product_image_url || productImageFile, // Send URL or file based on input
                     };
 
-                    let not_valid = false;
-                    if (!product_name?.trim()) {
-                        displayError("product_name", "Name must be inserted!");
-                        not_valid = true;
-                    } else {
-                        displayError("product_name", "");
-                    }
-
-                    if (isNaN(product_price) || Number(product_price) <= 0) {
-                        displayError("product_price", "Price must be a valid number greater than zero!");
-                        not_valid = true;
-                    } else {
-                        displayError("product_price", "");
-                    }
-
-
-                    if (!not_valid) {
-                        fetch("../../../API's/product_api's/edit_product.php", {
-                            method: 'POST',
-                            body:JSON.stringify({
-                            "product_id": productId,
-                            "product_name": product_name,
-                            "product_price": product_price,
-                            "product_gender": product_gender,
-                            "product_size_list": JSON.stringify(product_size_list),
-                            "product_description": product_description
-                        }),
+                    fetch("../../../API's/product_api's/edit_product.php", {
+                        method: 'POST',
+                        body: JSON.stringify(productData),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status) {
+                                alert(`Success: ${data.message}`);
+                                location.reload();
+                            } else {
+                                console.error('Error:', data.message);
+                                alert(`Error: ${data.message}`);
+                            }
                         })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status) {
-                                    alert(`Success: ${data.message}`);
-                                    location.reload();
-                                } else {
-                                    console.error('Error:', data.message);
-                                    alert(`Error: ${data.message}`);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Fetch Error:', error);
-                                alert(`An error occurred: ${error.message}`);
-                            });
+                        .catch(error => {
+                            console.error('Fetch Error:', error);
+                            alert(`An error occurred: ${error.message}`);
+                        });
+                }
+            });
+        }
+
+        // Function to create a file list for the file input
+        function createFileList(files) {
+            const dataTransfer = new DataTransfer();
+            files.forEach(file => dataTransfer.items.add(file));
+            return dataTransfer.files;
+        }
+
+        // Handle file input changes
+        const fileInput = document.getElementById("product_image");
+        if (fileInput) {
+            fileInput.addEventListener("change", function (event) {
+                productImageFile = event.target.files[0];
+                console.log("File selected via input:", productImageFile);
+            });
+        }
+
+        document.addEventListener('paste', function (event) {
+            const clipboardItems = event.clipboardData?.items || [];
+            let imageFile = null;
+
+            for (let i = 0; i < clipboardItems.length; i++) {
+                if (clipboardItems[i].type.indexOf("image") !== -1) {
+                    imageFile = clipboardItems[i].getAsFile();
+                    break;
+                }
+            }
+
+            if (imageFile) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const inputElement = document.getElementById('product_image');
+                    const imageDisplay = document.getElementById("image_display");
+                    const imageDisplayRow = document.getElementById("image_display_row");
+
+                    if (!inputElement || !imageDisplay || !imageDisplayRow) {
+                        console.error("Required DOM elements are missing!");
+                        return;
                     }
-                });
+
+                    imageDisplay.src = e.target.result;
+                    imageDisplayRow.classList.remove("hidden");
+
+                    productImageFile = imageFile;
+                    inputElement.files = createFileList([imageFile]);
+                    inputElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                };
+
+                reader.onerror = function () {
+                    alert("Failed to read the file!");
+                };
+
+                reader.readAsDataURL(imageFile);
+            } else {
+                alert("No image found in clipboard!");
             }
         });
-    </script>
+    });
+</script>
+
   </body>
 </html>

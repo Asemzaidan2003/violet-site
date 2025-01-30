@@ -2,7 +2,7 @@
 header("Content-Type: application/json");
 require '../conn.php';
 
-function addBottle($data, $imagePath) {
+function addBottle($data) {
     global $conn;
 
     $product_name = mysqli_real_escape_string($conn, $data['product_name']);
@@ -10,10 +10,11 @@ function addBottle($data, $imagePath) {
     $product_price = mysqli_real_escape_string($conn, $data['product_price']);
     $product_gender = mysqli_real_escape_string($conn, $data['product_gender']);
     $product_description = mysqli_real_escape_string($conn, $data['product_description']);
+    $product_image_src = mysqli_real_escape_string($conn, $data['product_image_src']);
 
     // Insert the new product
-    $insert_query = "INSERT INTO product (product_name, product_size_list, product_price, product_image_path, product_gender ,product_description) 
-                     VALUES ('$product_name', '$product_size_list', '$product_price', '$imagePath', '$product_gender','$product_description')";
+    $insert_query = "INSERT INTO product (product_name, product_size_list, product_price, product_image_path, product_gender, product_description) 
+                     VALUES ('$product_name', '$product_size_list', '$product_price', '$product_image_src', '$product_gender', '$product_description')";
 
     if (mysqli_query($conn, $insert_query)) {
         $product_id = $conn->insert_id;
@@ -32,6 +33,7 @@ function handleRequest() {
         $product_size_list = $_POST['product_size_list'];
         $product_gender = $_POST['product_gender'];
         $product_description = $_POST['product_description'];
+        $product_image_src = $_POST['product_image_src']; // Get image source
 
         // Check if the product name already exists
         $product_name_escaped = mysqli_real_escape_string($conn, $product_name);
@@ -43,35 +45,19 @@ function handleRequest() {
             return;
         }
 
-        // Handle image upload
-        if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/uploads/';
-
-            // Sanitize the product name to retain Arabic characters, remove only invalid characters
-            $sanitizedProductName = preg_replace('/[\/:*?"<>|]/', '_', $product_name);
-
-            // Extract image extension
-            $imageExtension = pathinfo($_FILES['product_image']['name'], PATHINFO_EXTENSION);
-            $imageName = $sanitizedProductName . '.' . $imageExtension;
-            $uploadPath = $uploadDir . $imageName;
-
-            // Move uploaded image to the uploads directory
-            if (move_uploaded_file($_FILES['product_image']['tmp_name'], $uploadPath)) {
-                $imagePath = '/uploads/' . $imageName;
-
-                $data = [
-                    'product_name' => $product_name,
-                    'product_size_list' => $product_size_list,
-                    'product_price' => $product_price,
-                    'product_gender' => $product_gender,
-                    'product_description'=>$product_description
-                ];
-                addBottle($data, $imagePath);
-            } else {
-                echo json_encode(['status' => false, 'message' => 'Failed to save image', 'data' => null]);
-            }
+        // Validate image source
+        if (!empty($product_image_src)) {
+            $data = [
+                'product_name' => $product_name,
+                'product_size_list' => $product_size_list,
+                'product_price' => $product_price,
+                'product_gender' => $product_gender,
+                'product_description' => $product_description,
+                'product_image_src' => $product_image_src
+            ];
+            addBottle($data);
         } else {
-            echo json_encode(['status' => false, 'message' => 'Image upload error', 'data' => null]);
+            echo json_encode(['status' => false, 'message' => 'Image source is required', 'data' => null]);
         }
     } else {
         http_response_code(405);

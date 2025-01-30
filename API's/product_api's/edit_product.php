@@ -5,7 +5,7 @@ require '../conn.php';
 function editProduct($data) {
     global $conn;
 
-    $required_fields = ['product_id', 'product_name', 'product_price', 'product_size_list', 'product_gender','product_description'];
+    $required_fields = ['product_id', 'product_name', 'product_price', 'product_size_list', 'product_gender', 'product_description', 'product_image_src'];
     $missing_fields = [];
 
     foreach ($required_fields as $field) {
@@ -25,6 +25,8 @@ function editProduct($data) {
     $product_size_list = mysqli_real_escape_string($conn, $data['product_size_list']);
     $product_gender = mysqli_real_escape_string($conn, $data['product_gender']);
     $product_description = mysqli_real_escape_string($conn, $data['product_description']);
+    $product_image_src = mysqli_real_escape_string($conn, $data['product_image_src']);
+
     // Check if the product name already exists, excluding the current product
     $check_query = "SELECT * FROM product WHERE product_name = '$product_name' AND product_id != '$product_id'";
     $result = mysqli_query($conn, $check_query);
@@ -40,7 +42,8 @@ function editProduct($data) {
                          product_price = '$product_price', 
                          product_size_list = '$product_size_list', 
                          product_gender = '$product_gender',
-                         product_description = '$product_description'
+                         product_description = '$product_description',
+                         product_image_path = '$product_image_src'
                      WHERE product_id = '$product_id'";
 
     if (mysqli_query($conn, $update_query)) {
