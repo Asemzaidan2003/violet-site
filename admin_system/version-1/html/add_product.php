@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const product_price = document.getElementById('product_price')?.value;
             const product_gender = document.getElementById('product_gender')?.value;
             const one_hundred_ml_price = document.getElementById('100_ml_price')?.value;
-            const product_description = document.getElementById('product-description')?.value;
+            const product_description = quill.root.innerHTML;
             const fifty_ml_price = document.getElementById('50_ml_price')?.value;
             const thirty_ml_price = document.getElementById('30_ml_price')?.value;
             const ten_ml_price = document.getElementById('10_ml_price')?.value;
