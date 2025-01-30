@@ -1,7 +1,7 @@
 document.getElementById('navigation-bar').innerHTML = 
 `
 		<div class="header_inner d-flex flex-row align-items-center justify-content-start">
-			<div class="logo"><a href="index.php">Violet</a></div>
+			<div class="logo"><a href="home.php">Violet</a></div>
 			<nav class="main_nav">
 				<ul>
 					<li><a href="categories.php?product_gender=male">Men Perfumes</a></li>
@@ -67,7 +67,7 @@ document.getElementById('footer').innerHTML =
     <div class="row">
         <div class="col text-center">
             <div class="footer_logo">
-                <a href="#">Violet Perfumes</a>
+                <a href="home.php">Violet Perfumes</a>
             </div>
             
             <nav class="footer_nav">
