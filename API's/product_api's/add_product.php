@@ -10,11 +10,11 @@ function addBottle($data) {
     $product_price = mysqli_real_escape_string($conn, $data['product_price']);
     $product_gender = mysqli_real_escape_string($conn, $data['product_gender']);
     $product_description = mysqli_real_escape_string($conn, $data['product_description']);
-    $product_image_src = mysqli_real_escape_string($conn, $data['product_image_src']);
+    $product_image_url = mysqli_real_escape_string($conn, $data['product_image_url']);
 
     // Insert the new product
     $insert_query = "INSERT INTO product (product_name, product_size_list, product_price, product_image_path, product_gender, product_description) 
-                     VALUES ('$product_name', '$product_size_list', '$product_price', '$product_image_src', '$product_gender', '$product_description')";
+                     VALUES ('$product_name', '$product_size_list', '$product_price', '$product_image_url', '$product_gender', '$product_description')";
 
     if (mysqli_query($conn, $insert_query)) {
         $product_id = $conn->insert_id;
@@ -33,7 +33,7 @@ function handleRequest() {
         $product_size_list = $_POST['product_size_list'];
         $product_gender = $_POST['product_gender'];
         $product_description = $_POST['product_description'];
-        $product_image_src = $_POST['product_image_src']; // Get image source
+        $product_image_url = $_POST['product_image_url']; 
 
         // Check if the product name already exists
         $product_name_escaped = mysqli_real_escape_string($conn, $product_name);
@@ -46,14 +46,14 @@ function handleRequest() {
         }
 
         // Validate image source
-        if (!empty($product_image_src)) {
+        if (!empty($product_image_url)) {
             $data = [
                 'product_name' => $product_name,
                 'product_size_list' => $product_size_list,
                 'product_price' => $product_price,
                 'product_gender' => $product_gender,
                 'product_description' => $product_description,
-                'product_image_src' => $product_image_src
+                'product_image_url' => $product_image_url
             ];
             addBottle($data);
         } else {

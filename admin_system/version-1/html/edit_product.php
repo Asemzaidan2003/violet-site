@@ -83,7 +83,7 @@
                       </div>
                       <div class="col m-1">
                         <label for="product image" class="form-label">product image</label>
-                        <input type="text" class="form-control" id="product_image"/>
+                        <input type="text" class="form-control" id="product_image_url"/>
                       </div>
                     </div>
                     <div class="card-body">
@@ -226,14 +226,14 @@
                     const imageDisplay = document.getElementById("image_display");
                     const imageDisplayRow = document.getElementById("image_display_row");
                     if (product.Product_image_path) {
-                        imageDisplay.src = `../../../API's/product_api's/${product.Product_image_path}`;
+                        imageDisplay.src = `${product.Product_image_path}`;
                         imageDisplayRow.classList.remove("hidden");
                     }
-
+                    console.log(product)
                     // Set the image URL input field (if applicable)
                     const imageUrlInput = document.getElementById('product_image_url');
-                    if (product.Product_image_url) {
-                        imageUrlInput.value = product.Product_image_url;
+                    if (product.Product_image_path) {
+                        imageUrlInput.value = product.Product_image_path;
                     }
                 } else {
                     alert("Product not found or error fetching product data.");
@@ -256,7 +256,7 @@
                 const fifty_ml_price = document.getElementById('50_ml_price')?.value;
                 const thirty_ml_price = document.getElementById('30_ml_price')?.value;
                 const ten_ml_price = document.getElementById('10_ml_price')?.value;
-
+                const product_image_url = document.getElementById('product_image_url')?.value;
                 const product_size_list = {
                     "10ml": ten_ml_price,
                     "30ml": thirty_ml_price,
@@ -264,8 +264,6 @@
                     "100ml": one_hundred_ml_price,
                 };
 
-                // Get the image URL (if provided)
-                const product_image_url = document.getElementById('product_image_url')?.value;
                 let not_valid = false;
                 if (!product_name?.trim()) {
                     displayError("product_name", "Name must be inserted!");
@@ -281,12 +279,12 @@
                     displayError("product_price", "");
                 }
 
-                if (!product_image_url && !productImageFile) {
-                    displayError("product_image", "Image URL or Image file must be provided!");
-                    not_valid = true;
-                } else {
-                    displayError("product_image", "");
-                }
+                // if (!product_image_url) {
+                //     displayError("product_image", "Image URL or Image file must be provided!");
+                //     not_valid = true;
+                // } else {
+                //     displayError("product_image", "");
+                // }
 
                 if (!not_valid) {
                     const productData = {
@@ -296,7 +294,7 @@
                         "product_gender": product_gender,
                         "product_size_list": JSON.stringify(product_size_list),
                         "product_description": product_description,
-                        "product_image_url": product_image_url || productImageFile, // Send URL or file based on input
+                        "product_image_url": product_image_url // Send URL or file based on input
                     };
 
                     fetch("../../../API's/product_api's/edit_product.php", {
@@ -337,47 +335,6 @@
             });
         }
 
-        document.addEventListener('paste', function (event) {
-            const clipboardItems = event.clipboardData?.items || [];
-            let imageFile = null;
-
-            for (let i = 0; i < clipboardItems.length; i++) {
-                if (clipboardItems[i].type.indexOf("image") !== -1) {
-                    imageFile = clipboardItems[i].getAsFile();
-                    break;
-                }
-            }
-
-            if (imageFile) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    const inputElement = document.getElementById('product_image');
-                    const imageDisplay = document.getElementById("image_display");
-                    const imageDisplayRow = document.getElementById("image_display_row");
-
-                    if (!inputElement || !imageDisplay || !imageDisplayRow) {
-                        console.error("Required DOM elements are missing!");
-                        return;
-                    }
-
-                    imageDisplay.src = e.target.result;
-                    imageDisplayRow.classList.remove("hidden");
-
-                    productImageFile = imageFile;
-                    inputElement.files = createFileList([imageFile]);
-                    inputElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-                };
-
-                reader.onerror = function () {
-                    alert("Failed to read the file!");
-                };
-
-                reader.readAsDataURL(imageFile);
-            } else {
-                alert("No image found in clipboard!");
-            }
-        });
     });
 </script>
 

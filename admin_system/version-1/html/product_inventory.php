@@ -141,7 +141,7 @@
                             row.innerHTML = `
                                 <td>
                                     <img 
-                                        src="../../../API's/product_api's/${product.Product_image_path}" 
+                                        src="${product.Product_image_path}" 
                                         alt="${product.product_name}" 
                                         style="width: 50px; height: 50px; object-fit: contain;" 
                                     />
